@@ -1,4 +1,4 @@
-# Group Activity Recognition (Volleyball) — Simple Baselines
+# Group Activity Recognition (Volleyball)
 
 PyTorch code for **group activity recognition** on the Volleyball dataset, with a simple baseline model (`models/baseline1`).
 
