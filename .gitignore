@@ -1,0 +1,29 @@
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Training outputs / large artifacts
+runs/
+saved_models/
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.npz
+
+# Local / large datasets (keep code only)
+data/
+volleyball-datasets/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Secrets
+.env
