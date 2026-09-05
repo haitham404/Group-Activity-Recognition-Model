@@ -8,7 +8,7 @@ from PIL import Image
 from torchvision import transforms
 
 from constants import actions, num_features
-from models.baseline3.model import Person_Activity_Classifier
+from models.baseline1.model import Person_Activity_Classifier
 from utils.data_utils import load_annotations, splits
 
 
@@ -19,13 +19,25 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 # =========================
-# Paths (UPDATED FOR YOUR MACHINE)
+# CLI arguments
 # =========================
-base_dir = "//volleyball-datasets"
+import argparse
+parser = argparse.ArgumentParser(description="Extract features from volleyball dataset")
+parser.add_argument("--data-dir", default="volleyball-datasets", help="Dataset root directory")
+parser.add_argument("--videos-dir", default=None, help="Videos directory (relative to data-dir)")
+parser.add_argument("--annotations-dir", default=None, help="Annotations directory")
+parser.add_argument("--output-dir", default="features", help="Output directory for features")
+args = parser.parse_args()
 
-videos_dir = os.path.join(base_dir, "videos")
-annotations_dir = os.path.join(base_dir, "volleyball_tracking_annotation")
-features_dir = os.path.join(base_dir, "features")
+
+# =========================
+# Paths (configurable via CLI)
+# =========================
+base_dir = args.data_dir
+videos_dir = os.path.join(base_dir, args.videos_dir, "videos") if args.videos_dir else os.path.join(base_dir, "videos")
+annotations_dir = args.annotations_dir or os.path.join(base_dir, "volleyball_tracking_annotation") if args.annotations_dir else os.path.join(base_dir, "volleyball_tracking_annotation")
+features_dir = os.path.join(base_dir, args.output_dir)
+
 
 # Load dataset annotations
 annotations = load_annotations(videos_dir, annotations_dir)
@@ -49,17 +61,16 @@ transform = transforms.Compose([
 # =========================
 model = Person_Activity_Classifier(len(actions))
 
-# Load trained weights
+# Load trained weights (optional - uses best-effort loading)
+weights_path = os.path.join(base_dir, "saved_models", "best_model.pth")
 try:
     model.load_state_dict(
-        torch.load(
-            "/mnt/New Volume/Deep Learning. DR Mostafa/Group_Activity_Recognition/models/baseline2/model_20250309_005202_4",
-            map_location=device
-        )
+        torch.load(weights_path, map_location=device)
     )
     print("Model weights loaded successfully.")
 except FileNotFoundError:
-    print("Warning: Model weights not found. Using randomly initialized weights.")
+    print("Warning: Model weights not found at", weights_path, ". Using randomly initialized weights.")
+
 
 # Remove classification head → keep feature extractor only
 model = nn.Sequential(*list(model.children())[:-1]).to(device)

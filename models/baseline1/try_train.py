@@ -1,7 +1,36 @@
 import sys
 import os
+import argparse
 import torch
 torch.cuda.empty_cache()
+
+# Parse CLI arguments
+parser = argparse.ArgumentParser(description="Try training Baseline1")
+parser.add_argument(
+    "--data-dir",
+    default="volleyball-datasets",
+    help="Path to dataset root (default: volleyball-datasets under cwd)",
+)
+parser.add_argument(
+    "--epochs",
+    type=int,
+    default=5,
+    help="Number of training epochs (default: 5)",
+)
+parser.add_argument(
+    "--lr",
+    type=float,
+    default=0.001,
+    help="Learning rate (default: 0.001)",
+)
+parser.add_argument(
+    "--batch-size",
+    type=int,
+    default=64,
+    help="Batch size (default: 64)",
+)
+args = parser.parse_args()
+
 # Automatically find the project root (assuming train.py is inside models/base_line1/)
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -15,7 +44,6 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torch
 import os
-
 
 
 from model import b1_classifier
@@ -52,8 +80,7 @@ test_transformers = transforms.Compose([
 ])
 
 
-PROJECT_ROOT = r"/mnt/New Volume/Deep Learning. DR Mostafa/05- Project 1 - CV/volleyball-datasets"
-sys.path.append(PROJECT_ROOT)
+PROJECT_ROOT = os.path.abspath(args.data_dir)
 group_activity_clases = ["r_set", "r_spike", "r-pass", "r_winpoint", "l_winpoint", "l-pass", "l-spike", "l_set"]
 group_activity_labels = {class_name:i for i, class_name in enumerate(group_activity_clases)}
 
@@ -87,12 +114,10 @@ test_dataset = Group_Activity_DataSet(
 )
 
 
-
-
 # Step 3 DataLoader
 train_loader = DataLoader(
     dataset=train_dataset,
-    batch_size=64,
+    batch_size=args.batch_size,
     shuffle=True,
     num_workers=4,
     pin_memory=True
@@ -101,7 +126,7 @@ train_loader = DataLoader(
 
 val_loader = DataLoader(
     dataset=val_dataset,
-    batch_size=64,
+    batch_size=args.batch_size,
     shuffle=True,
     num_workers=4,
     pin_memory=True
@@ -109,11 +134,12 @@ val_loader = DataLoader(
 )
 
 test_loader = DataLoader(
-    test_dataset,
-    batch_size=64,
+    dataset=test_dataset,
+    batch_size=args.batch_size,
     shuffle=False,
     num_workers=4,
     pin_memory=True
+
 )
 
 
@@ -130,7 +156,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = b1_classifier(num_classes=8)
 model.to(device)
 
-optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
+optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
+
 
 # Training loop
 def train_one_epoch(epoch_index, tb_writer):
@@ -170,13 +197,12 @@ def train_one_epoch(epoch_index, tb_writer):
     return last_loss
 
 
-
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-log_dir = os.path.expanduser('/mnt/New Volume/Deep Learning. DR Mostafa/Group_activity_project')
-writer = SummaryWriter(log_dir.format(timestamp))
+log_dir = os.path.join(args.data_dir, 'Group_activity_project', f'logs_{timestamp}')
+writer = SummaryWriter(log_dir)
 epoch_number = 0
 
-EPOCHS = 5
+EPOCHS = args.epochs
 
 best_vloss = 1_000_000.
 

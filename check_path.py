@@ -1,7 +1,12 @@
 import os
+import argparse
 from PIL import Image
 
-base_path = "//volleyball-datasets"
+parser = argparse.ArgumentParser(description="Check dataset paths")
+parser.add_argument("--data-dir", default="volleyball-datasets", help="Dataset root directory")
+args = parser.parse_args()
+
+base_path = args.data_dir
 
 print(f"Base directory exists: {os.path.exists(base_path)}")
 
@@ -16,6 +21,6 @@ print(os.path.exists(img_path))
 
 try:
     img = Image.open(img_path)
-    img.show()
+    print(f"Image loaded successfully, size: {img.size}")
 except Exception as e:
     print(f"Error: {e}")
