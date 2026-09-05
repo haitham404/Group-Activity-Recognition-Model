@@ -122,14 +122,5 @@ This project is **actively developed** for the CV lab application. Current statu
 | Attention models | 📋 Planned |
 | Dataset expansion | 📋 Planned |
 
-## Results (Expected)
 
-Baseline1 on Volleyball dataset typically achieves:
-- **Validation Accuracy**: ~50-70% (depending on dataset size)
-- **Test Accuracy**: ~45-65%
 
-These results improve with more training epochs and data augmentation.
-
-## Citation
-
-If you use this code for your research, please cite accordingly and consider extending the baselines.
